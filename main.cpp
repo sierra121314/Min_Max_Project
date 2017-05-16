@@ -100,8 +100,10 @@ public:
     double T = 5.0; //set//
     double u;
     void Init();
-    double Simulation(ofstream& fout, bool tofile,bool Noisy, double noise(double val, double variance));
+    double Simulation(ofstream& fout, bool tofile, bool NOISY);
     void find_beta(); //thanks Bryant
+    double N(double sigma, double mu);
+    double noise(double val, double variance);
     
     //Evolutionary EA;
 };
@@ -139,7 +141,7 @@ void boat::Init() { //pass in NN and EA
     
 }
 
-double boat::Simulation(ofstream &fout, bool PUT_TO_FILE, bool Noisy, double noise(double val, double variance)) {
+double boat::Simulation(ofstream &fout, bool PUT_TO_FILE, bool NOISY) {
     //pass in weights
     double y;
     double m;
@@ -206,10 +208,10 @@ double boat::Simulation(ofstream &fout, bool PUT_TO_FILE, bool Noisy, double noi
         /// GET VALUE OF U FROM NN
         NN.execute();
         //cout << "poop" << endl;
-        if (Noisy == false){
+        if (NOISY == false){
             u = NN.get_output(0)* PI / 180;
         }
-        else if (Noisy==true){
+        else if (NOISY==true){
             u = NN.get_output(0)* PI / 180 + noise(u, 0.1);
         }
         //cout << "u" << u << endl;
@@ -219,7 +221,7 @@ double boat::Simulation(ofstream &fout, bool PUT_TO_FILE, bool Noisy, double noi
         
         /// CALCULATE X,Y,THETA,W ///
         
-        if (Noisy==false){
+        if (NOISY==false){
             boat_x1 = boat_x + v*cos(theta)*dt;
             boat_y1 = boat_y + v*sin(theta)*dt;
             theta = theta + w*dt;
@@ -232,7 +234,7 @@ double boat::Simulation(ofstream &fout, bool PUT_TO_FILE, bool Noisy, double noi
             w = w + ((u - w)*dt) / T;
             
         }
-        else if (Noisy==true){
+        else if (NOISY==true){
             boat_x1 = boat_x + v*cos(theta)*dt+noise(boat_x, 0.5);
             boat_y1 = boat_y + v*sin(theta)*dt+noise(boat_y, 0.5);
             theta = theta + w*dt+noise(theta,0.1);
@@ -433,7 +435,7 @@ vector<Policies> EA_Downselect(vector<Policies> population) { //Binary Tournamen
 
 ////// NOISE //////////
 
-double N(double sigma, double mu){ //normal distribution
+double boat::N(double sigma, double mu){ //normal distribution
     const double epsilon = std::numeric_limits<double>::min();
     const double two_pi = 2.0*3.14159265358979323846;
     
@@ -456,7 +458,7 @@ double N(double sigma, double mu){ //normal distribution
     return z0 * sigma + mu;
 }
 
-double noise(double val, double variance){
+double boat::noise(double val, double variance){
     double changed_val = val + N(0,variance);
     return changed_val;
 }
@@ -531,7 +533,7 @@ int main()
             if(g==MAX_GENERATIONS-1 && s==0){PUT_TO_FILE=true;}
             //if(g==0 && s==0){PUT_TO_FILE=true;}
             //if(g==0 && s==0){PUT_TO_FILE=true;}
-            population.at(s).fitness = B.Simulation(fout,PUT_TO_FILE, NOISY,noise(double val, double variance));
+            population.at(s).fitness = B.Simulation(fout,PUT_TO_FILE,NOISY);
             PUT_TO_FILE=false;
             //cout << num_weights << endl;
             
