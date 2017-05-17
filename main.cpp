@@ -639,22 +639,23 @@ int main()
         
         for (int s = 0; s < population.size(); s++) {
             fout <<"," <<"Sim" << s << ","<< "boat_x" << ',' << "boat_y" << ',' << "theta" << ',' << "w" << ',' << "stray" << ',' << "Pu" << ',' << "sum_distance" << ',' << "i";
-            //cout << population.size() << endl;
+            
             NN.set_weights(population.at(s).weights, true);
             
             if(g%50==0 && s==0){PUT_TO_FILE=true;}
             if(g==MAX_GENERATIONS-1 && s==0){PUT_TO_FILE=true;}
             //if(g==0 && s==0){PUT_TO_FILE=true;}
             //if(g==0 && s==0){PUT_TO_FILE=true;}
+            
             population.at(s).P_fitness = B.Simulation(fout,PUT_TO_FILE,NOISY);
+            
             PUT_TO_FILE=false;
             assert(num_weights ==10);
-            
-            // UPDATE EA WITH FITNESS
-            
-            
-            
+    
         }
+        
+        // UPDATE EA WITH FITNESS
+        
         /// PRIMARY EA - DOWNSELECT WITH GIVEN FITNESS
         sort(population.begin(),population.end(),less_than_key());
         population = EA_Downselect(population);
