@@ -212,7 +212,7 @@ double boat::Simulation(ofstream &fout, bool PUT_TO_FILE, bool NOISY) {
             u = NN.get_output(0)* PI / 180;
         }
         else if (NOISY==true){
-            u = NN.get_output(0)* PI / 180 + noise(0, 0.00001);
+            u = NN.get_output(0)* PI / 180 + noise(0, 0.01);
         }
         //cout << "u" << u << endl;
         
@@ -235,16 +235,16 @@ double boat::Simulation(ofstream &fout, bool PUT_TO_FILE, bool NOISY) {
             
         }
         else if (NOISY==true){
-            boat_x1 = boat_x + v*cos(theta)*dt + noise(0,0.00005);
-            boat_y1 = boat_y + v*sin(theta)*dt + noise(0,0.00005);
-            theta = theta + w*dt + noise(0, 0.00001);
+            boat_x1 = boat_x + v*cos(theta)*dt + noise(0,0.05);
+            boat_y1 = boat_y + v*sin(theta)*dt + noise(0,0.05);
+            theta = theta + w*dt + noise(0, 0.01);
             if (theta > (1 * PI)) {
                 theta = theta - 2 * PI;
             }
             else if (theta < (-1 * PI)) {
                 theta = theta + 2 * PI;
             }
-            w = w + ((u - w)*dt) / T + noise(0,0.00001);
+            w = w + ((u - w)*dt) / T + noise(0,0.01);
             
             
         }
