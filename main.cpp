@@ -40,9 +40,6 @@ int boundary_y_high = 100;
 
 class Policies {
 public:
-    //MR_1:  initialize a population of policies - associated with a fitness
-    //fitness //MR_2::  distance for the entire policy, minimal
-    //
     double fitness = 0;
     void init_policy(int num_weights); //initialize one policy
     vector<double> weights;
@@ -76,6 +73,19 @@ void Policies::init_policy(int num_weights) {
     
 }
 
+class Ant_Policies {
+public:
+    double A_fitness = 0;
+    void init_A_policy(int num_A_weights);
+    vector<double> A_weights;
+};
+
+void Ant_Policies::init_A_policy(int num_A_weights){
+    for (int a = 0; a < num_A_weights; a++){
+        A_weights.push_back(0);
+    }
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////   B   O   A   T   /////////////////////////////////////////
@@ -98,7 +108,7 @@ public:
     double dt = 0.2; //time step //set//
     double theta; //radians
     double T = 5.0; //set//
-    double u;
+    double Pu;
     void Init();
     double Simulation(ofstream& fout, bool tofile, bool NOISY);
     void find_beta(); //thanks Bryant
@@ -117,7 +127,7 @@ void boat::Init() { //pass in NN and EA
     boat_x = start_boat_x;
     boat_y = start_boat_y;
     beta = 0;
-    u = 0;
+    Pu = 0;
     /// ORIENTATION OF AGENT ///
     double theta_deg = rand()%360; ///random degree orientation
     starting_theta = theta_deg * PI / 180; /// converts degrees to radians
@@ -209,10 +219,10 @@ double boat::Simulation(ofstream &fout, bool PUT_TO_FILE, bool NOISY) {
         NN.execute();
         //cout << "poop" << endl;
         if (NOISY == false){
-            u = NN.get_output(0)* PI / 180;
+            Pu = NN.get_output(0)* PI / 180;
         }
         else if (NOISY==true){
-            u = NN.get_output(0)* PI / 180 + noise(0, 0.01);
+            Pu = NN.get_output(0)* PI / 180 + noise(0, 0.01);
         }
         //cout << "u" << u << endl;
         
@@ -231,7 +241,7 @@ double boat::Simulation(ofstream &fout, bool PUT_TO_FILE, bool NOISY) {
             else if (theta < (-1 * PI)) {
                 theta = theta + 2 * PI;
             }
-            w = w + ((u - w)*dt) / T;
+            w = w + ((Pu - w)*dt) / T;
             
         }
         else if (NOISY==true){
@@ -244,7 +254,7 @@ double boat::Simulation(ofstream &fout, bool PUT_TO_FILE, bool NOISY) {
             else if (theta < (-1 * PI)) {
                 theta = theta + 2 * PI;
             }
-            w = w + ((u - w)*dt) / T + noise(0,0.01);
+            w = w + ((Pu - w)*dt) / T + noise(0,0.01);
             
             
         }
@@ -261,7 +271,7 @@ double boat::Simulation(ofstream &fout, bool PUT_TO_FILE, bool NOISY) {
                     sum_distance = distance - 5 * (1000 - i);
                     //cout << "FOUND GOAL\t";
                     if(PUT_TO_FILE){
-                        fout << "\n" << "," << "," <<boat_x << ',' << boat_y << ',' << theta << ',' << w << ',' << stray << ',' << u << ',' << sum_distance << ',' << i;}
+                        fout << "\n" << "," << "," <<boat_x << ',' << boat_y << ',' << theta << ',' << w << ',' << stray << ',' << Pu << ',' << sum_distance << ',' << i;}
                     break;
                 }
             }
@@ -272,7 +282,7 @@ double boat::Simulation(ofstream &fout, bool PUT_TO_FILE, bool NOISY) {
                     sum_distance = distance - 5 * (1000 - i);
                     //cout << "FOUND GOAL\t";
                     if(PUT_TO_FILE){
-                        fout << "\n" << "," << "," <<boat_x << ',' << boat_y << ',' << theta << ',' << w << ',' << stray << ',' << u << ',' << sum_distance << ',' << i;}
+                        fout << "\n" << "," << "," <<boat_x << ',' << boat_y << ',' << theta << ',' << w << ',' << stray << ',' << Pu << ',' << sum_distance << ',' << i;}
                     break;
                 }
             }
@@ -289,7 +299,7 @@ double boat::Simulation(ofstream &fout, bool PUT_TO_FILE, bool NOISY) {
         
         
         if(PUT_TO_FILE){
-            fout << "\n" << "," << "," <<boat_x << ',' << boat_y << ',' << theta << ',' << w << ',' << stray << ',' << u << ',' << sum_distance << ',' << i;}
+            fout << "\n" << "," << "," <<boat_x << ',' << boat_y << ',' << theta << ',' << w << ',' << stray << ',' << Pu << ',' << sum_distance << ',' << i;}
         //cout << boat_x << ',' << boat_y << ',' << theta << ',' << w << endl;
         
         /// CALCULATE DISTANCE TO GOAL ///
@@ -304,7 +314,7 @@ double boat::Simulation(ofstream &fout, bool PUT_TO_FILE, bool NOISY) {
             sum_distance += distance + 2.5 * (1000 - i);
             //cout << "OUTSIDE\t";
             if(PUT_TO_FILE){
-                fout << "\n" << "," << "," <<boat_x << ',' << boat_y << ',' << theta << ',' << w << ',' << stray << ',' << u << ',' << sum_distance << ',' << i;}
+                fout << "\n" << "," << "," <<boat_x << ',' << boat_y << ',' << theta << ',' << w << ',' << stray << ',' << Pu << ',' << sum_distance << ',' << i;}
             break;
         }
         assert(boat_x > boundary_x_low);
