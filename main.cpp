@@ -131,7 +131,8 @@ void boat::Init() { //pass in NN and EA
     Pu = 0;
     Au = 0;
     /// ORIENTATION OF AGENT ///
-    double theta_deg = rand()%360; ///random degree orientation
+   // double theta_deg = rand()%360; ///random degree orientation
+    double theta_deg = 45;
     starting_theta = theta_deg * PI / 180; /// converts degrees to radians
     //starting_theta = 0;
     theta = starting_theta;
@@ -223,7 +224,7 @@ double boat::Simulation(ofstream &fout, bool PUT_TO_FILE, bool NOISY) {
             //Get Au
         }
         else if (NOISY==true){
-            Pu = NN.get_output(0)* PI / 180 + noise(0, 0.01);
+            Pu = NN.get_output(0)* PI / 180 + noise(0, 0.07);
             //Get Au
         }
        
@@ -328,7 +329,7 @@ double boat::Simulation(ofstream &fout, bool PUT_TO_FILE, bool NOISY) {
     //cout << s << "\t" << boat_x << ',' << boat_y << endl;
     
     /// CALCULATE THE FITNESS - uses distance and time // MR_4 //
-    P_fitness = sum_distance; //overall distance it took to get to the goal
+    P_fitness = sum_distance + stray; //overall distance it took to get to the goal
     //cout << fitness << endl;
     //fout << "fitness" << "," << fitness << endl;
     return P_fitness;
@@ -566,7 +567,7 @@ double boat::noise(double val, double variance){
 int main()
 {
     
-    int MAX_GENERATIONS = 1500;
+    int MAX_GENERATIONS = 500;
     int pop_size = 100;
     srand(time(NULL));
     
@@ -613,6 +614,7 @@ int main()
     assert(population.size() == pop_size);
     
     /// INITIALIZE ANTAGONIST POLICIES ///
+    /*
     vector<Ant_Policies> A_population;
     for (int a = 0; a < pop_size; a++) {
         Policies A;
@@ -620,7 +622,7 @@ int main()
         population.push_back(A);
     }
     assert(A_population.size() == pop_size);
-    
+    */
     
     ////////// START SIMULATION ///////////////
     ofstream fout; //Movements
@@ -636,7 +638,7 @@ int main()
         cout << "GEN" << g << endl;
         
         for (int s = 0; s < population.size(); s++) {
-            fout <<"," <<"Sim" << s << ",";
+            fout <<"," <<"Sim" << s << ","<< "boat_x" << ',' << "boat_y" << ',' << "theta" << ',' << "w" << ',' << "stray" << ',' << "Pu" << ',' << "sum_distance" << ',' << "i";
             //cout << population.size() << endl;
             NN.set_weights(population.at(s).weights, true);
             
