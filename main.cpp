@@ -108,14 +108,15 @@ public:
     double dt = 0.2; //time step //set//
     double theta; //radians
     double T = 5.0; //set//
-    double Pu;
+    double Pu; //Primary u value
+    double Au; //Antagonist u value
     void Init();
     double Simulation(ofstream& fout, bool tofile, bool NOISY);
     void find_beta(); //thanks Bryant
+    
     double N(double sigma, double mu);
     double noise(double val, double variance);
     
-    //Evolutionary EA;
 };
 
 void boat::Init() { //pass in NN and EA
@@ -128,6 +129,7 @@ void boat::Init() { //pass in NN and EA
     boat_y = start_boat_y;
     beta = 0;
     Pu = 0;
+    Au = 0;
     /// ORIENTATION OF AGENT ///
     double theta_deg = rand()%360; ///random degree orientation
     starting_theta = theta_deg * PI / 180; /// converts degrees to radians
@@ -136,7 +138,6 @@ void boat::Init() { //pass in NN and EA
     
     /// ANGULAR SPEED OF AGENT ///
     starting_w = 0;
-    //starting_w = 0;
     w = starting_w;
     
     /// GOAL POSITION ///
@@ -158,7 +159,6 @@ double boat::Simulation(ofstream &fout, bool PUT_TO_FILE, bool NOISY) {
     double b;
     double boat_x1;
     double boat_y1;
-    double time;
     double distance;
     double distance_x;
     double distance_y;
@@ -220,15 +220,13 @@ double boat::Simulation(ofstream &fout, bool PUT_TO_FILE, bool NOISY) {
         //cout << "poop" << endl;
         if (NOISY == false){
             Pu = NN.get_output(0)* PI / 180;
+            //Get Au
         }
         else if (NOISY==true){
             Pu = NN.get_output(0)* PI / 180 + noise(0, 0.01);
+            //Get Au
         }
-        //cout << "u" << u << endl;
-        
-        //cout << "S:U\t" << stray << "\t" << u << endl;
-        
-        
+       
         /// CALCULATE X,Y,THETA,W ///
         
         if (NOISY==false){
@@ -576,6 +574,7 @@ int main()
     
     //Evolutionary EA;
     int num_weights = 0;
+    int num_A_weights = 0;
     
     /// SET UP NEURAL NETWORK ///
     
@@ -583,19 +582,22 @@ int main()
     
     //for stray
     NN.set_in_min_max(-3, 3);
-    //NN.set_in_min_max(-4, 4);
     
-    /// FOR X-VALUES
-    //NN.set_in_min_max(0.0, boundary_x_high); /// limits of input for normalization
-    /// FOR Y-VALUES
-    //NN.set_in_min_max(0.0, boundary_y_high); /// limits of input for normalization
-    /// FOR THETA
-    //NN.set_in_min_max(0.0, 6.28);
+        /// FOR X-VALUES
+        //NN.set_in_min_max(0.0, boundary_x_high); /// limits of input for normalization
+        /// FOR Y-VALUES
+        //NN.set_in_min_max(0.0, boundary_y_high); /// limits of input for normalization
+        /// FOR THETA
+        //NN.set_in_min_max(0.0, 6.28);
+    
     /// FOR U
     NN.set_out_min_max(-15.0, 15.0); /// limits of outputs for normalization
     
-    //NN.set_vector_input(vi); /// vector of inputs
     num_weights = NN.get_number_of_weights();
+    
+    //For Antagonist
+    //num_A_weights = NN.get_number_of_weights();
+    
     
     /// DEFINE STARTING POSITION AND GOAL POSITION ///
     boat B;
@@ -604,11 +606,21 @@ int main()
     /// INITIALIZE POLICIES ///
     vector<Policies> population;
     for (int p = 0; p < pop_size; p++) {
+        Policies P;
+        P.init_policy(num_weights);
+        population.push_back(P);
+    }
+    assert(population.size() == pop_size);
+    
+    /// INITIALIZE ANTAGONIST POLICIES ///
+    vector<Ant_Policies> A_population;
+    for (int a = 0; a < pop_size; a++) {
         Policies A;
         A.init_policy(num_weights);
         population.push_back(A);
     }
-    assert(population.size() == pop_size);
+    assert(A_population.size() == pop_size);
+    
     
     ////////// START SIMULATION ///////////////
     ofstream fout; //Movements
@@ -641,11 +653,21 @@ int main()
             
             
         }
-        /// EA - DOWNSELECT WITH GIVEN FITNESS
+        /// PRIMARY EA - DOWNSELECT WITH GIVEN FITNESS
         sort(population.begin(),population.end(),less_than_key());
         population = EA_Downselect(population);
-        /// EA - MUTATE and repopulate WEIGHTS
+        ///  PRIMARY EA - MUTATE and repopulate WEIGHTS
         population = EA_Replicate(population, num_weights);
+        
+        /*
+         /// ANTAGONIST EA - DOWNSELECT 
+         sort(A_population.begin(),A_population.end(), less_than_key());
+         A_population = Ant_EA_Downselect(A_population);
+         /// ANTAGONIST EA - MUTATE AND REPOPULATE
+         A_population = Ant_EA_Downselect(A_population);
+         
+         */
+        
         
         
         //sort(population.begin(),population.end(),less_than_key());
@@ -659,11 +681,7 @@ int main()
     }
     fout.close();
     cout << "pop size" << population.size() << endl;
-    //////// MR_2 ///////////
-    //assert(B.boat_y <= B.goal_y2 && B.boat_y >= B.goal_y1 && B.boat_x <= (B.goal_x2 + .05*B.goal_x2) && B.boat_x >= (B.goal_x2 - .05*B.goal_x2));
-    //cout << "Boat passed through goal" << endl;
     
-    //sort(population.begin(), population.end(), less_than_key());
     
     //int input;
     //cin >> input;
