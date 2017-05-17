@@ -212,7 +212,7 @@ double boat::Simulation(ofstream &fout, bool PUT_TO_FILE, bool NOISY) {
             u = NN.get_output(0)* PI / 180;
         }
         else if (NOISY==true){
-            u = NN.get_output(0)* PI / 180 + noise(u, 0.1);
+            u = NN.get_output(0)* PI / 180 + noise(0, 0.1);
         }
         //cout << "u" << u << endl;
         
@@ -235,20 +235,17 @@ double boat::Simulation(ofstream &fout, bool PUT_TO_FILE, bool NOISY) {
             
         }
         else if (NOISY==true){
-            boat_x1 = boat_x + v*cos(theta)*dt;
-            boat_x1 = noise(boat_x1,0.5);
-            boat_y1 = boat_y + v*sin(theta)*dt;
-            boat_y1 = noise(boat_y1,0.5);
-            theta = theta + w*dt;
-            theta = noise(theta, 0.1);
+            boat_x1 = boat_x + v*cos(theta)*dt + noise(0,0.5);
+            boat_y1 = boat_y + v*sin(theta)*dt + noise(0,0.5);
+            theta = theta + w*dt + noise(0, 0.1);
             if (theta > (1 * PI)) {
                 theta = theta - 2 * PI;
             }
             else if (theta < (-1 * PI)) {
                 theta = theta + 2 * PI;
             }
-            w = w + ((u - w)*dt) / T;
-            w = noise(w,0.1);
+            w = w + ((u - w)*dt) / T+noise(0,0.1);
+            
             
         }
         
@@ -473,11 +470,11 @@ double boat::noise(double val, double variance){
 int main()
 {
     
-    int MAX_GENERATIONS = 150;
+    int MAX_GENERATIONS = 1500;
     int pop_size = 100;
     srand(time(NULL));
     
-    bool NOISY = false; //change this if you want noise //false means no noise
+    bool NOISY = true; //change this if you want noise //false means no noise
     
     //Evolutionary EA;
     int num_weights = 0;
