@@ -350,7 +350,8 @@ void boat::find_beta() {
 
 //////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////   EVOLUTIONARY ALGORITHM  ////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////// P R I M A R Y //////////////////////////////////////////
+
 vector<Policies> EA_Replicate(vector<Policies> population, int num_weights) {
     //Take vector of policies and double it
     // Mutate the doubled policies slightly
@@ -442,6 +443,93 @@ vector<Policies> EA_Downselect(vector<Policies> population) { //Binary Tournamen
     
     return Pop_new;
 }
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////   EVOLUTIONARY ALGORITHM  ////////////////////////////////////
+////////////////////////////// A N T A G O N I S T ///////////////////////////////////////
+
+vector<Ant_Policies> EA_Replicate(vector<Ant_Policies> population, int num_A_weights) {
+    //Take vector of policies and double it
+    // Mutate the doubled policies slightly
+    int Ra;
+    int Oa;
+    int num = population.size();
+    
+    int n = num_A_weights; //number of mutations
+    
+    vector<Ant_Policies> Gen;
+    Gen = population; //Copies the old population
+    
+    for (int i = 0; i < num; i++) {
+        Ra = rand() % (population.size());
+        Gen.push_back(population.at(Ra));
+        
+        for (int x = 0; x < n; x++) {
+            Oa = rand() % num_A_weights;
+            
+            if(rand()%4==0){
+                Gen.back().A_weights.at(Oa) = Gen.back().A_weights.at(Oa) + LYRAND - LYRAND ;
+            }
+            else{
+                Gen.back().A_weights.at(Oa) = Gen.back().A_weights.at(Oa) + 0.25*LYRAND - 0.25*LYRAND ;
+            }
+            
+        }
+        
+    }
+    return Gen;
+}
+
+
+vector<Ant_Policies> EA_Downselect(vector<Ant_Policies> population) { //Binary Tournament
+    
+    vector<Ant_Policies> Pop_new;
+    int num = population.size();
+    //cout << num << ") ";
+    
+    int best;
+    best = -1;
+    double bestval = 999999999999;
+    for(int i=0; i<population.size(); i++){
+        if(population.at(i).A_fitness < bestval){
+            best = i;
+            bestval = population.at(i).A_fitness;
+        }
+    }
+    assert(best!=-1);
+    
+    Pop_new.push_back(population.at(best));
+    
+    for (int i = 1; i < num / 2; i++) {
+        int Ra;
+        int Sa;
+        Ra = rand() % num;
+        Sa = rand() % (num);
+        //cout << "R\t" << R << endl;
+        while (Ra == Sa) { //to make sure R and S aren't the same
+            Sa = rand() % num;
+        }
+        
+        ///THE GREATER SIGN IS THE DIFFERENCE BETWEEN ANTAGONIST AND PRIMARY ///
+        if (population.at(Ra).A_fitness > population.at(Sa).A_fitness) {
+            //Ra Wins!
+            Pop_new.push_back(population.at(Ra));
+        }
+        
+        else {
+            /// "Sa WINS"
+            Pop_new.push_back(population.at(Sa));
+        }
+    }
+    assert(Pop_new.size() == population.size() / 2); //MR_4
+    //return that new vector
+    
+    return Pop_new;
+}
+
+
 
 
 ////// NOISE //////////
