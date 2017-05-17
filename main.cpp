@@ -329,7 +329,7 @@ double boat::Simulation(ofstream &fout, bool PUT_TO_FILE, bool NOISY) {
     //cout << s << "\t" << boat_x << ',' << boat_y << endl;
     
     /// CALCULATE THE FITNESS - uses distance and time // MR_4 //
-    P_fitness = sum_distance + stray; //overall distance it took to get to the goal
+    P_fitness = sum_distance; //overall distance it took to get to the goal
     //cout << fitness << endl;
     //fout << "fitness" << "," << fitness << endl;
     return P_fitness;
@@ -571,7 +571,7 @@ int main()
     int pop_size = 100;
     srand(time(NULL));
     
-    bool NOISY = true; //change this if you want noise //false means no noise
+    bool NOISY = false; //change this if you want noise //false means no noise
     
     //Evolutionary EA;
     int num_weights = 0;
