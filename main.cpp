@@ -618,7 +618,7 @@ int main()
     vector<Ant_Policies> A_population;
     for (int a = 0; a < pop_size; a++) {
         Policies A;
-        A.init_policy(num_weights);
+        A.init_policy(num_A_weights);
         population.push_back(A);
     }
     assert(A_population.size() == pop_size);
