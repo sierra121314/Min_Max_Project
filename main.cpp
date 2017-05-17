@@ -648,7 +648,7 @@ int main()
             //if(g==0 && s==0){PUT_TO_FILE=true;}
             population.at(s).P_fitness = B.Simulation(fout,PUT_TO_FILE,NOISY);
             PUT_TO_FILE=false;
-            //cout << num_weights << endl;
+            assert(num_weights ==10);
             
             // UPDATE EA WITH FITNESS
             
