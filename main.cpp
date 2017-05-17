@@ -40,7 +40,7 @@ int boundary_y_high = 100;
 
 class Policies {
 public:
-    double fitness = 0;
+    double P_fitness = 0;
     void init_policy(int num_weights); //initialize one policy
     vector<double> weights;
     
@@ -50,7 +50,7 @@ struct less_than_key
 {
     inline bool operator() (const Policies& struct1, const Policies& struct2)
     {
-        return (struct1.fitness < struct2.fitness);
+        return (struct1.P_fitness < struct2.P_fitness);
     }
 };
 
@@ -58,7 +58,7 @@ struct greater_than_key
 {
     inline bool operator() (const Policies& struct1, const Policies& struct2)
     {
-        return (struct1.fitness > struct2.fitness);
+        return (struct1.P_fitness > struct2.P_fitness);
     }
 };
 
@@ -166,7 +166,7 @@ double boat::Simulation(ofstream &fout, bool PUT_TO_FILE, bool NOISY) {
     double min_distance;
     double start_goal_distance = 0;
     double sum_distance;
-    double fitness = 0;
+    double P_fitness = 0;
     
     /// INITIALIZE STARTING POSITIONS //
     boat_x = start_boat_x;
@@ -330,10 +330,10 @@ double boat::Simulation(ofstream &fout, bool PUT_TO_FILE, bool NOISY) {
     //cout << s << "\t" << boat_x << ',' << boat_y << endl;
     
     /// CALCULATE THE FITNESS - uses distance and time // MR_4 //
-    fitness = sum_distance; //overall distance it took to get to the goal
+    P_fitness = sum_distance; //overall distance it took to get to the goal
     //cout << fitness << endl;
     //fout << "fitness" << "," << fitness << endl;
-    return fitness;
+    return P_fitness;
     //population[s].fitness = fabs(fitness);
 }
 
@@ -405,9 +405,9 @@ vector<Policies> EA_Downselect(vector<Policies> population) { //Binary Tournamen
     best = -1;
     double bestval = 999999999999;
     for(int i=0; i<population.size(); i++){
-        if(population.at(i).fitness < bestval){
+        if(population.at(i).P_fitness < bestval){
             best = i;
-            bestval = population.at(i).fitness;
+            bestval = population.at(i).P_fitness;
         }
     }
     assert(best!=-1);
@@ -424,7 +424,7 @@ vector<Policies> EA_Downselect(vector<Policies> population) { //Binary Tournamen
             S = rand() % num;
         }
         //cout << "S\t" << S << endl;
-        if (population.at(R).fitness < population.at(S).fitness) {
+        if (population.at(R).P_fitness < population.at(S).P_fitness) {
             /// "R WINS"
             Pop_new.push_back(population.at(R));
             //cout << population.at(R).fitness << endl;
@@ -450,7 +450,7 @@ vector<Policies> EA_Downselect(vector<Policies> population) { //Binary Tournamen
 ///////////////////////////   EVOLUTIONARY ALGORITHM  ////////////////////////////////////
 ////////////////////////////// A N T A G O N I S T ///////////////////////////////////////
 
-vector<Ant_Policies> EA_Replicate(vector<Ant_Policies> population, int num_A_weights) {
+vector<Ant_Policies> Ant_EA_Replicate(vector<Ant_Policies> population, int num_A_weights) {
     //Take vector of policies and double it
     // Mutate the doubled policies slightly
     int Ra;
@@ -483,7 +483,7 @@ vector<Ant_Policies> EA_Replicate(vector<Ant_Policies> population, int num_A_wei
 }
 
 
-vector<Ant_Policies> EA_Downselect(vector<Ant_Policies> population) { //Binary Tournament
+vector<Ant_Policies> Ant_EA_Downselect(vector<Ant_Policies> population) { //Binary Tournament
     
     vector<Ant_Policies> Pop_new;
     int num = population.size();
@@ -632,7 +632,7 @@ int main()
             if(g==MAX_GENERATIONS-1 && s==0){PUT_TO_FILE=true;}
             //if(g==0 && s==0){PUT_TO_FILE=true;}
             //if(g==0 && s==0){PUT_TO_FILE=true;}
-            population.at(s).fitness = B.Simulation(fout,PUT_TO_FILE,NOISY);
+            population.at(s).P_fitness = B.Simulation(fout,PUT_TO_FILE,NOISY);
             PUT_TO_FILE=false;
             //cout << num_weights << endl;
             
