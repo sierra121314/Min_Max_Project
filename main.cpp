@@ -124,7 +124,7 @@ void boat::Init() { //pass in NN and EA
     //start_boat_x = rand() % boundary_x_high;
     //start_boat_y = rand() % boundary_y_high;
     start_boat_x = 60;
-    start_boat_y = 20;
+    start_boat_y = 60;
     boat_x = start_boat_x;
     boat_y = start_boat_y;
     beta = 0;
@@ -132,7 +132,7 @@ void boat::Init() { //pass in NN and EA
     Au = 0;
     /// ORIENTATION OF AGENT ///
    // double theta_deg = rand()%360; ///random degree orientation
-    double theta_deg = 45;
+    double theta_deg = -45;
     starting_theta = theta_deg * PI / 180; /// converts degrees to radians
     //starting_theta = 0;
     theta = starting_theta;
@@ -310,7 +310,7 @@ double boat::Simulation(ofstream &fout, bool PUT_TO_FILE, bool NOISY) {
         
         /// CONDITIONS TO QUIT THE LOOP ////
         if (boat_x < boundary_x_low || boat_x > boundary_x_high || boat_y < boundary_y_low || boat_y > boundary_y_high) {
-            sum_distance += distance + 2.5 * (1000 - i);
+            sum_distance += distance + 1.5 * (1000 - i);
             //cout << "OUTSIDE\t";
             if(PUT_TO_FILE){
                 fout << "\n" << "," << "," <<boat_x << ',' << boat_y << ',' << theta << ',' << w << ',' << stray << ',' << Pu << ',' << sum_distance << ',' << i;}
@@ -320,7 +320,6 @@ double boat::Simulation(ofstream &fout, bool PUT_TO_FILE, bool NOISY) {
         assert(boat_y > boundary_y_low);
         assert(boat_x < boundary_x_high);
         assert(boat_y < boundary_y_high);
-        //cout << "boat within boundary" << endl;
         
         
     } //for loop
@@ -567,7 +566,7 @@ double boat::noise(double val, double variance){
 int main()
 {
     
-    int MAX_GENERATIONS = 500;
+    int MAX_GENERATIONS = 1500;
     int pop_size = 100;
     srand(time(NULL));
     
@@ -636,7 +635,7 @@ int main()
         //cout << population.size() << endl;
         fout << "\nGEN" << g << "  ";
         cout << "GEN" << g << endl;
-        
+        //SHUFFLE BOTH POPULATIONS
         for (int s = 0; s < population.size(); s++) {
             fout <<"," <<"Sim" << s << ","<< "boat_x" << ',' << "boat_y" << ',' << "theta" << ',' << "w" << ',' << "stray" << ',' << "Pu" << ',' << "sum_distance" << ',' << "i";
             
