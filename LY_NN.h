@@ -187,6 +187,9 @@ void neural_network::set_weights(vector<double> user_input, bool safe){
         
     }
     
+    
+    
+    
     /// for each hidden node
     for(int i=0; i<hidden.layer_nodes.size(); i++){
         /// for each eight attaced to the hidden node
@@ -195,6 +198,36 @@ void neural_network::set_weights(vector<double> user_input, bool safe){
             z++;
         }
     }
+    
+    
+    
+    //For testing purposes *******************
+    /*
+    for(int i=0; i<input.layer_nodes.size(); i++)
+    {
+        /// for each weight attached to the input node
+        for(int j=0; j<input.layer_nodes.at(i).outweights.size(); j++)
+        {
+            cout << input.layer_nodes.at(i).outweights.at(j) << "\t";
+        }
+        
+    }
+    
+    for(int i=0; i<hidden.layer_nodes.size(); i++)
+    {
+        /// for each eight attaced to the hidden node
+        for(int j=0; j<hidden.layer_nodes.at(i).outweights.size(); j++)
+        {
+            cout << hidden.layer_nodes.at(i).outweights.at(j) << "\t";
+        }
+    }
+    cout << endl;
+    cout << endl;
+     */
+    //*******************
+    
+    
+    
     return;
 }
 
@@ -257,7 +290,7 @@ void neural_network::clean(){
 }
 
 void node::true_sigmoid() {
-	outp = 1 / (1 + exp(-inp));
+    outp = 1 / (1 + exp(-inp));
 }
 
 void node::sigmoid(){

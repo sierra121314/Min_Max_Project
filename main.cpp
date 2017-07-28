@@ -1,4 +1,3 @@
-
 // Final_Test.cpp : Defines the entry point for the console application.
 //
 
@@ -25,13 +24,13 @@
 
 using namespace std;
 neural_network NN;
-#define PI 3.1415
+#define PI 3.14159265359
 #define LYRAND (double)rand()/RAND_MAX
 
 int boundary_x_low = 0;
 int boundary_y_low = 0;
-int boundary_x_high = 100;
-int boundary_y_high = 100;
+int boundary_x_high = 10;
+int boundary_y_high = 10;
 
 
 ////////////////////////////////////////////////////////////////////////////
@@ -63,11 +62,17 @@ struct greater_than_key
 };
 
 
+
+//??Why are all the weights initialized to 0 -> this is a biased initialization of the solutuion space and could lead to sub optimal solutions in the given generation constriant. Weights should be initialized uniformly between -1 and 1
 void Policies::init_policy(int num_weights) {
     for (int p = 0; p < num_weights; p++) {
         //cout << "Order " << p << endl;
-        weights.push_back(0);
+        //??weights.push_back(0);
         //weights.push_back(0);
+        
+        //should use this
+        double r = 2*((double)rand()/RAND_MAX)+(-1);
+        weights.push_back(r);
     }
     
     
@@ -117,22 +122,25 @@ public:
     double N(double sigma, double mu);
     double noise(double val, double variance);
     
+    
+    vector<double> goal_box;
+    
 };
 
 void boat::Init() { //pass in NN and EA
     /// STARTING POSITION OF BOAT ///
     //start_boat_x = rand() % boundary_x_high;
     //start_boat_y = rand() % boundary_y_high;
-    start_boat_x = 60;
-    start_boat_y = 60;
+    start_boat_x = 1;
+    start_boat_y = 5;
     boat_x = start_boat_x;
     boat_y = start_boat_y;
     beta = 0;
-    Pu = 0;
-    Au = 0;
+    Pu = 0;                                 //not multi-user friendly deffinition, omega?
+    Au = 0;                                 //not multi-user friendly deffinition, theta?
     /// ORIENTATION OF AGENT ///
-   // double theta_deg = rand()%360; ///random degree orientation
-    double theta_deg = -45;
+    // double theta_deg = rand()%360; ///random degree orientation
+    double theta_deg = 0;
     starting_theta = theta_deg * PI / 180; /// converts degrees to radians
     //starting_theta = 0;
     theta = starting_theta;
@@ -146,11 +154,102 @@ void boat::Init() { //pass in NN and EA
     //goal_y1 = rand() % (boundary_y_high-2);
     //goal_x2 = goal_x1;
     //goal_y2 = goal_y1 - 2;
-    goal_x1 = 10; //testing
-    goal_y1 = 10; //testing
-    goal_x2 = 10; //testing
-    goal_y2 = 30; //testing
+    goal_x1 = 3; //testing      //top/left
+    goal_y1 = 5; //testing      //top/left
+    goal_x2 = 5; //testing      //bottom/right
+    goal_y2 = 5; //testing      //bottom/right
     
+    
+    //this will work for now
+    //x1,y1,x2,y2,x3,y3,x4,y4
+    //x1
+    goal_box.push_back(goal_x1-2*(v/T));
+    if(goal_box.at(0)<0)
+    {
+        goal_box.at(0) = 0;
+    }
+    if(goal_box.at(0)>boundary_x_high)
+    {
+        goal_box.at(0) = boundary_x_high;
+    }
+    //y1
+    goal_box.push_back(goal_y1+2*(v/T));
+    if(goal_box.at(1)<0)
+    {
+        goal_box.at(1) = 0;
+    }
+    if(goal_box.at(1)>boundary_y_high)
+    {
+        goal_box.at(1) = boundary_y_high;
+    }
+    //x2
+    goal_box.push_back(goal_x2+2*(v/T));
+    if(goal_box.at(2)<0)
+    {
+        goal_box.at(2) = 0;
+    }
+    if(goal_box.at(2)>boundary_x_high)
+    {
+        goal_box.at(2) = boundary_x_high;
+    }
+    //y2
+    goal_box.push_back(goal_y1+2*(v/T));
+    if(goal_box.at(3)<0)
+    {
+        goal_box.at(3) = 0;
+    }
+    if(goal_box.at(3)>boundary_y_high)
+    {
+        goal_box.at(3) = boundary_y_high;
+    }
+    //x3
+    goal_box.push_back(goal_x2-2*(v/T));
+    if(goal_box.at(4)<0)
+    {
+        goal_box.at(4) = 0;
+    }
+    if(goal_box.at(4)>boundary_x_high)
+    {
+        goal_box.at(4) = boundary_x_high;
+    }
+    //y3
+    goal_box.push_back(goal_y2-2*(v/T));
+    if(goal_box.at(5)<0)
+    {
+        goal_box.at(5) = 0;
+    }
+    if(goal_box.at(5)>boundary_y_high)
+    {
+        goal_box.at(5) = boundary_y_high;
+    }
+    //x4
+    goal_box.push_back(goal_x2+2*(v/T));
+    if(goal_box.at(6)<0)
+    {
+        goal_box.at(6) = 0;
+    }
+    if(goal_box.at(6)>boundary_x_high)
+    {
+        goal_box.at(6) = boundary_x_high;
+    }
+    //y4
+    goal_box.push_back(goal_y2-2*(v/T));
+    if(goal_box.at(7)<0)
+    {
+        goal_box.at(7) = 0;
+    }
+    if(goal_box.at(7)>boundary_y_high)
+    {
+        goal_box.at(7) = boundary_y_high;
+    }
+    for(int i=0; i<4; i++)
+    {
+        assert(goal_box.at(2*i)>=0 && goal_box.at(2*i)<=boundary_x_high);
+    }
+    for(int i=0; i<4; i++)
+    {
+        assert(goal_box.at(2*i+1)>=0 && goal_box.at(2*i+1)<=boundary_y_high);
+    }
 }
 
 double boat::Simulation(ofstream &fout, bool PUT_TO_FILE, bool NOISY) {
@@ -185,8 +284,21 @@ double boat::Simulation(ofstream &fout, bool PUT_TO_FILE, bool NOISY) {
     min_distance = start_goal_distance;
     
     
+    
+    
+    
     //cout << "before time step loop" << endl;
     for (int i = 0; i < 1000; i++) {
+        if (i==0)
+        {
+            //for testing purposes *********************
+            /*
+            cout << "Boat State" << endl;
+            cout << "X" << "\t" << "Y" << "\t" << "Theta" << "\t" << "Omega" << "\t" << endl;
+            cout << boat_x << "\t" << boat_y << "\t" << Au << "\t" << Pu << endl;
+             */
+            //*********************
+        }
         
         /// CALCULATE THE STRAY FROM THE GOAL ///
         find_beta();
@@ -217,17 +329,19 @@ double boat::Simulation(ofstream &fout, bool PUT_TO_FILE, bool NOISY) {
         //cout << boat_x << ',' << boat_y << endl;
         //cout << w << endl;
         /// GET VALUE OF U FROM NN
+        
         NN.execute();
         //cout << "poop" << endl;
         if (NOISY == false){
             Pu = NN.get_output(0)* PI / 180;
+            Pu = 0;                             //test preset *****************************
             //Get Au
         }
         else if (NOISY==true){
             Pu = NN.get_output(0)* PI / 180 + noise(0, 0.07);
             //Get Au
         }
-       
+        
         /// CALCULATE X,Y,THETA,W ///
         
         if (NOISY==false){
@@ -258,17 +372,28 @@ double boat::Simulation(ofstream &fout, bool PUT_TO_FILE, bool NOISY) {
             
         }
         
+        //for testing purposes ************************
+        /*
+        cout << "Boat State" << endl;
+        cout << "X" << "\t" << "Y" << "\t" << "Theta" << "\t" << "Omega" << "\t" << endl;
+        cout << boat_x1 << "\t" << boat_y1 << "\t" << Au << "\t" << Pu << endl;
+         */
+        //************************
+        
         
         /// CALCULATIONS FOR INTERCEPT ///
         m = (boat_y1 - boat_y) / (boat_x1 - boat_x); ///slope
         b = boat_y1 - m*boat_x1; /// y intercept
         y = m*goal_x1 + b; ///equation of a line
         
+        
+        //This is not currently working ***********************
+        //Need to consider directly above or below the goal or inline
         if (boat_x1 < boat_x) {		//If x1 is to the left of x2
             if (boat_x1 <= goal_x1 && boat_x >= goal_x2) {	//If they are on either side of the goal
                 if (y >= goal_y1 && y <= goal_y2) {
                     sum_distance = distance - 5 * (1000 - i);
-                    //cout << "FOUND GOAL\t";
+                    //cout << "FOUND GOAL" << endl;
                     if(PUT_TO_FILE){
                         fout << "\n" << "," << "," <<boat_x << ',' << boat_y << ',' << theta << ',' << w << ',' << stray << ',' << Pu << ',' << sum_distance << ',' << i;}
                     break;
@@ -279,7 +404,7 @@ double boat::Simulation(ofstream &fout, bool PUT_TO_FILE, bool NOISY) {
             if (boat_x <= goal_x1 && boat_x1 >= goal_x2) {	//If they are on either side of the goal
                 if (y >= goal_y1 && y <= goal_y2) {
                     sum_distance = distance - 5 * (1000 - i);
-                    //cout << "FOUND GOAL\t";
+                    //cout << "FOUND GOAL" << endl;
                     if(PUT_TO_FILE){
                         fout << "\n" << "," << "," <<boat_x << ',' << boat_y << ',' << theta << ',' << w << ',' << stray << ',' << Pu << ',' << sum_distance << ',' << i;}
                     break;
@@ -291,8 +416,8 @@ double boat::Simulation(ofstream &fout, bool PUT_TO_FILE, bool NOISY) {
         
         /// UPDATE NEW X,Y, VALUES ///
         // no noise here since it noise was calculated in boat_x1 and boat_y1
-       boat_x = boat_x1; ///setting the new x value
-       boat_y = boat_y1; ///setting the new y value
+        boat_x = boat_x1; ///setting the new x value
+        boat_y = boat_y1; ///setting the new y value
         
         
         
@@ -314,6 +439,7 @@ double boat::Simulation(ofstream &fout, bool PUT_TO_FILE, bool NOISY) {
             //cout << "OUTSIDE\t";
             if(PUT_TO_FILE){
                 fout << "\n" << "," << "," <<boat_x << ',' << boat_y << ',' << theta << ',' << w << ',' << stray << ',' << Pu << ',' << sum_distance << ',' << i;}
+            cout << "OUT OF MAP" << endl; //*******************
             break;
         }
         assert(boat_x > boundary_x_low);
@@ -365,16 +491,55 @@ vector<Policies> EA_Replicate(vector<Policies> population, int num_weights) {
     for (int i = 0; i < num; i++) {
         R = rand() % (population.size());
         Gen.push_back(population.at(R));
+        //cout << Gen.size() << endl;
         
+        //***************************************
+        /*
         for (int x = 0; x < n; x++) {
             O = rand() % num_weights;
-            
+            //?? what is going on here
             if(rand()%4==0){
                 Gen.back().weights.at(O) = Gen.back().weights.at(O) + LYRAND - LYRAND ;
+                //weights need to be contraint to [-1 1]
+                assert(Gen.back().weights.at(O)<=1 && Gen.back().weights.at(O)>=-1);
             }
             else{
                 Gen.back().weights.at(O) = Gen.back().weights.at(O) + 0.25*LYRAND - 0.25*LYRAND ;
+                //weights need to be contraint to [-1 1]
+                assert(Gen.back().weights.at(O)<=1 && Gen.back().weights.at(O)>=-1);
             }
+         }
+            */
+            //***************************************
+            
+            
+            //cout << "MUTATE" << "\t";
+        for (int x = 0; x < n; x++)
+        {
+            double random = ((double)rand()/RAND_MAX);
+            //cout << "r" << "\t" << random << endl;
+            if (random <= 0.5)
+            {
+                double R1 = ((double)rand()/RAND_MAX) * 0.05;
+                double R2 = ((double)rand()/RAND_MAX) * 0.05;
+                Gen.at(Gen.size()-1).weights.at(x) = Gen.at(Gen.size()-1).weights.at(x) + (R1-R2);
+                if (Gen.at(Gen.size()-1).weights.at(x)<-1)
+                {
+                    Gen.at(Gen.size()-1).weights.at(x) = -1;
+                }
+                if (Gen.at(Gen.size()-1).weights.at(x)>1)
+                {
+                    Gen.at(Gen.size()-1).weights.at(x) = 1;
+                }
+                //cout << x << "\t";
+            }
+            //cout << Gen.at(Gen.size()-1).weights.at(x) << endl;
+            assert(Gen.at(Gen.size()-1).weights.at(x)<=1 && Gen.at(Gen.size()-1).weights.at(x)>=-1);
+        }
+        //cout << endl;
+            
+            
+            
             //if (population.at(R).weights.at(O) > 1) {
             //    population.at(R).weights.at(O) = 1;
             //}
@@ -386,8 +551,6 @@ vector<Policies> EA_Replicate(vector<Policies> population, int num_weights) {
         
         
         //assert(Gen[R].weights != Pop[R].weights); //LR_4
-        
-    }
     return Gen;
 }
 
@@ -410,9 +573,11 @@ vector<Policies> EA_Downselect(vector<Policies> population) { //Binary Tournamen
     }
     assert(best!=-1);
     
-    Pop_new.push_back(population.at(best));
+    //This will alwsy happen with biniary selection therefore is not needed here.
+    //Pop_new.push_back(population.at(best));
+    //cout << num/2 << endl;
     
-    for (int i = 1; i < num / 2; i++) {
+    for (int i = 0; i < num / 2; i++) {
         int R;
         int S;
         R = rand() % num;
@@ -422,20 +587,25 @@ vector<Policies> EA_Downselect(vector<Policies> population) { //Binary Tournamen
             S = rand() % num;
         }
         //cout << "S\t" << S << endl;
+        //cout << "Policy" << "\t";
         if (population.at(R).P_fitness < population.at(S).P_fitness) {
             /// "R WINS"
             Pop_new.push_back(population.at(R));
             //cout << population.at(R).fitness << endl;
+            //cout << R << "\t" << "WINS" << endl;
         }
         
         else {
             /// "S WINS"
             Pop_new.push_back(population.at(S));
             //cout << population.at(S).fitness << endl;
+            //cout << S << "\t" << "WINS" << endl;
         }
         //cout << Pop_new.size() << " ";
     }
     //cout << endl;
+    //
+    //cout << Pop_new.size() << "\t" << population.size() << endl;
     assert(Pop_new.size() == population.size() / 2); //MR_4
     //return that new vector
     
@@ -566,8 +736,8 @@ double boat::noise(double val, double variance){
 int main()
 {
     
-    int MAX_GENERATIONS = 1500;
-    int pop_size = 100;
+    int MAX_GENERATIONS = 1;
+    int pop_size = 6;
     srand(time(NULL));
     
     bool NOISY = false; //change this if you want noise //false means no noise
@@ -583,12 +753,12 @@ int main()
     //for stray
     NN.set_in_min_max(-3, 3);
     
-        /// FOR X-VALUES
-        //NN.set_in_min_max(0.0, boundary_x_high); /// limits of input for normalization
-        /// FOR Y-VALUES
-        //NN.set_in_min_max(0.0, boundary_y_high); /// limits of input for normalization
-        /// FOR THETA
-        //NN.set_in_min_max(0.0, 6.28);
+    /// FOR X-VALUES
+    //NN.set_in_min_max(0.0, boundary_x_high); /// limits of input for normalization
+    /// FOR Y-VALUES
+    //NN.set_in_min_max(0.0, boundary_y_high); /// limits of input for normalization
+    /// FOR THETA
+    //NN.set_in_min_max(0.0, 6.28);
     
     /// FOR U
     NN.set_out_min_max(-15.0, 15.0); /// limits of outputs for normalization
@@ -612,16 +782,32 @@ int main()
     }
     assert(population.size() == pop_size);
     
+    //For testing purposes ***********************
+    /*
+    cout << "BEFORE" << endl;
+    for (int s=0; s<population.size(); s++)
+    {
+        for (int w=0; w<population.at(s).weights.size(); w++)
+        {
+            cout << population.at(s).weights.at(w) << "\t";
+        }
+        cout << endl;
+        cout << endl;
+    }
+    cout << endl;
+     */
+    //**************************
+    
     /// INITIALIZE ANTAGONIST POLICIES ///
     /*
-    vector<Ant_Policies> A_population;
-    for (int a = 0; a < pop_size; a++) {
-        Policies A;
-        A.init_policy(num_A_weights);
-        population.push_back(A);
-    }
-    assert(A_population.size() == pop_size);
-    */
+     vector<Ant_Policies> A_population;
+     for (int a = 0; a < pop_size; a++) {
+     Policies A;
+     A.init_policy(num_A_weights);
+     population.push_back(A);
+     }
+     assert(A_population.size() == pop_size);
+     */
     
     ////////// START SIMULATION ///////////////
     ofstream fout; //Movements
@@ -639,7 +825,11 @@ int main()
         for (int s = 0; s < population.size(); s++) {
             fout <<"," <<"Sim" << s << ","<< "boat_x" << ',' << "boat_y" << ',' << "theta" << ',' << "w" << ',' << "stray" << ',' << "Pu" << ',' << "sum_distance" << ',' << "i";
             
+            
+            
             NN.set_weights(population.at(s).weights, true);
+            
+            
             
             if(g%50==0 && s==0){PUT_TO_FILE=true;}
             if(g==MAX_GENERATIONS-1 && s==0){PUT_TO_FILE=true;}
@@ -650,7 +840,7 @@ int main()
             
             PUT_TO_FILE=false;
             assert(num_weights ==10);
-    
+            
         }
         
         // UPDATE EA WITH FITNESS
@@ -658,11 +848,29 @@ int main()
         /// PRIMARY EA - DOWNSELECT WITH GIVEN FITNESS
         sort(population.begin(),population.end(),less_than_key());
         population = EA_Downselect(population);
+        //cout << population.size() << endl;
         ///  PRIMARY EA - MUTATE and repopulate WEIGHTS
         population = EA_Replicate(population, num_weights);
         
+        
+        //For testing purposes ***********************
         /*
-         /// ANTAGONIST EA - DOWNSELECT 
+        cout << "AFTER" << endl;
+        for (int s=0; s<population.size(); s++)
+        {
+            for (int w=0; w<population.at(s).weights.size(); w++)
+            {
+                cout << population.at(s).weights.at(w) << "\t";
+            }
+            cout << endl;
+            cout << endl;
+        }
+        cout << endl;
+         */
+        //**************************
+        
+        /*
+         /// ANTAGONIST EA - DOWNSELECT
          sort(A_population.begin(),A_population.end(), less_than_key());
          A_population = Ant_EA_Downselect(A_population);
          /// ANTAGONIST EA - MUTATE AND REPOPULATE
@@ -682,10 +890,19 @@ int main()
         
     }
     fout.close();
-    cout << "pop size" << population.size() << endl;
-    
-    
-    //int input;
-    //cin >> input;
-    return 0;
+    //cout << "pop size" << population.size() << endl;
 }
+
+
+
+//***************************************************************************************
+//Problem/Solution Summary
+
+//P:    Agent unable to detect goal from all necessary orientations of the agent and goal.
+//S:    Need to update line intersection function -> can be optimized by adding in a conditional box or area around goal.
+
+//P:    Agent weights not being initalized correctly leading to poor learning performance.
+//S:    Updated policy initialization function to uniformly initialze weights between -1 and 1.
+
+//P:    Mutate function not keeping weights in the bounds of -1 and 1.
+//S:    Updated to proper mutate function with bound controls
